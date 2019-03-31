@@ -1,4 +1,5 @@
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -9,10 +10,12 @@ import org.openqa.selenium.support.ui.Select;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertTrue;
+
 public class TestKatalon {
     WebDriver driver;
-    String nameId ="first-name";
-    String lastnameId ="last-name";
+    String nameId = "first-name";
+    String lastnameId = "last-name";
     String genderxpath = "//*[@id=\"infoForm\"]/div[3]/div/div/label[2]";
     String dateofbirthId = "dob";
     String addressId = "address";
@@ -22,6 +25,8 @@ public class TestKatalon {
     String commentId = "comment";
     String submitId = "submit";
     String roleId = "role";
+    String firstNameErrorId = "first-name-error";
+
     @Before
     public void setUp() {
 
@@ -35,16 +40,23 @@ public class TestKatalon {
         driver.get("https://katalon-test.s3.amazonaws.com/demo-aut/dist/html/form.html");
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
+
     @Test
-    public void testValidUserRegistration(){
+    public void testValidUserRegistration() {
         //znajdź element do wpisania imienia
         WebElement nameField = driver.findElement(By.id(nameId));
         //kliknij pole, wyczyść i wpisz tekst "Karol"
-        nameField.click();
-        nameField.clear();
-        nameField.sendKeys("Karol");
+        if (nameField.isDisplayed()) {
+            nameField.click();
+            nameField.clear();
+            nameField.sendKeys("Karol");
+            System.out.println("Wpisuję w pole o id: " + nameId + " wartość: Karol" );
+        } else {
+            Assert.fail();
+        }
         WebElement lastnameField = driver.findElement(By.id(lastnameId));
         //kliknij pole, wyczyść i wpisz tekst "Karol"
+        if (lastnameField.isDisplayed())
         lastnameField.click();
         lastnameField.clear();
         lastnameField.sendKeys("Kowalski");
@@ -75,7 +87,7 @@ public class TestKatalon {
         companyField.click();
         companyField.clear();
         companyField.sendKeys("Coders Lab");
-        Select select = new Select(driver.findElement(By.id (roleId)));
+        Select select = new Select(driver.findElement(By.id(roleId)));
         select.selectByVisibleText("QA");
         //wybranie opcji w selecie
         WebElement commentField = driver.findElement(By.id(commentId));
@@ -88,8 +100,21 @@ public class TestKatalon {
         submitButton.submit();
 
     }
+    @Test
+    public void errorHandling(){
+        //od razu klikamy na submit, żeby sprawdzić, czy pojawią się wiadomości walidacyjne
+        WebElement submitButton = driver.findElement(By.id(submitId));
+        //kliknij pole, wyczyść i wpisz datę urodzenia
+        submitButton.click();
+
+        WebElement firstNameErrorMessage = driver.findElement(By.id (firstNameErrorId));
+        assertTrue(firstNameErrorMessage.isDisplayed());
+
+    }
+
+
     @After
-    public void tearDown(){
+    public void tearDown() {
         //driver.quit();
     }
 }
